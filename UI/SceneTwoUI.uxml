@@ -1,0 +1,3 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:Label text="This label is in the UI for scene #2&#10;&#10;The background of scene #2 is solid blue.&#10;If the background is not solid blue, the UI failed to change.&#10;&#10;Press Page-Up to switch to Scene #1" class="opacity-zero lbl-default" style="font-size: 30px; color: rgb(255, 255, 255);" />
+</ui:UXML>
