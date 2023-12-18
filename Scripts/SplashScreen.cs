@@ -3,37 +3,6 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-
-/*
-
-I also encountered this issue when building WebGL [Unity 2023.1.20f1], playing in Firefox 120.0.1 (64-bit).
-
-However, my example I while switching between scenes (ie: Back and forth between MainMenu <-> InGame). Each scene only needs its own UI.
-
-I tried multiple approaches:
-A) Singleton UIDocument, that each scene will set the rootVisualElement to a value specific to that scene. In this scenario, I tried having a standard panelSetting and replacing it each time.
-B) Singleton UIDocument, that each scene would .Clear() and .Add() a CloneTree() of its own specific VisualTreeAsset. Similarly, in this scenario, tried keeping and replacing panelSettings. 
-C) Individual UIDocument, that each scene created via AddComponent, and set up with its own VisualTreeAsset and PanelSettings.
-D) Individual UIDocument already existing on a GameObject in each scene, already had setup for with scene's VisualTreeAsset and PanelSettings.
-E) Exactly as (D); however, the GameObject is inactive for X seconds. (This was to test if an alotted time needed to pass before loading a UIDocument)
-
-I never saw the IndexOutOfRangeException.
-I am able to consistently reproduce-  InvalidOperationException: Stack Empty.
-I also am able to consistently reproduce- InvalidOperationException: Failed to Free handle with Index=0 Version=0
-Which was mentioned in this thread- forum.unity.com/threads/1391191
-
-It seems that one or the other InvalidOperationException intermitently (may change between page reloads) will be thrown; however, regardless of which is thrown, it always will be at the same point for a given test.
-I also have observed that the "Stack Empty" exception seems to occure more frequently with higher quantity of element in at least one of the uxml's; subsiquently, the other Exception seems to occur more frequently when there is only 1 element in both uxml files.
-
-Some additional observations:
-Scenario (A) will always fail during the assignment of UIDocument.visualTreeAsset (ie: uidoc.visualTreeAsset = vta;)
-Scenario (B) will always fail during CloneTree()
-Scenario (C) will always fail during AddComponent<UIDocument>()
-Scenario (D) will always fail before Awake()
-Scenario (E) will always fail before Awake()
- 
- */
-
 namespace TestWebGL {
     /// <summary>
     /// When should the test be ran.
@@ -48,11 +17,11 @@ namespace TestWebGL {
         Delayed, // TODO: The DelayActive that was added, could probably be used to simplify the Delayed logic used.
     }
     public enum How {
-        Singleton_ClearAdd, // One DontDestroyOnLoad UIDocument is created, that each scene's UI Controller will .Clear() and then .Add() a VisualElementTree.cloneTree() to. UI removal/destruction is handled by the .Clear().
-        Singleton_Replace, // One DontDestroyOnLoad UIDocument is created, that each scene's UI Controller will set the UIDocument's panelSettings and visualTreeAsset. UI removal/destruction is handled by the replacement/unsetting of the visualTreeAsset on the UIDocument.
-        Individual_Create, // Each UI Controller has its own UIDocument already attached and setup. UI removal/destruction is handled by the scene unloading.
-        Individual_Exists, // Each UI Controller will add a new UIDocument and set it up. UI removal/destruction is handled by the scene unloading.
-        Individual_Exists_Delayed, // Each UI Controller will add a new UIDocument and set it up. UI removal/destruction is handled by the scene unloading.
+        Singleton_ClearAdd, // A DontDestroyOnLoad UIDocument is created that has a VisualElement container. The UI Controller in the test scene will .Clear() and then .Add() a VisualElementTree.cloneTree() to the container. UI removal/destruction is handled by the .Clear().
+        Singleton_Replace, // A DontDestroyOnLoad UIDocument is created. The UI Controller in the test scene will set (replace) the UIDocument.visualTreeAsset with that scene's specific VisualTreeAsset. UI removal/destruction is handled by the overwriting of UIDocument.visualTreeAsset.
+        Individual_Create, // The UI Controller in each scene will create a new UIDocument (via AddComponent), and assign that scene's specific values to UIDocument.visualTreeAsset and .panelSettings. UI removal/destruction is handled by the unload of the scene.
+        Individual_Exists, // The UI Controller in each scene already has an attached UIDocument component, preconfigured and setup. UI removal/destruction is handled by the unloading of the scene.
+        Individual_Exists_Delayed, // The UI Controller in each scene already has an attached UIDocument component, preconfigured and setup; however, the GameObject start inactivated, and will activate after X number of seconds (defined as delayedSceneAmount). UI removal/destruction is handled by the unloading of the scene.
     }
 
     [Flags]
